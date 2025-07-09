@@ -10,7 +10,7 @@ gemini_api_key = os.getenv("GEMINI_API_KEY") or st.secrets["GEMINI_API_KEY"]
 
 # Configure Gemini
 genai.configure(api_key=gemini_api_key)
-model = genai.GenerativeModel("gemini-pro")  # free model
+model = genai.GenerativeModel("chat-bison-001")  # free model
 
 # Streamlit UI
 st.set_page_config(page_title="Venantie Medical Assistant", page_icon="🧬", layout="wide")
