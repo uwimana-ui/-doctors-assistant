@@ -8,7 +8,7 @@ import os
 load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
-st.set_page_config(page_title="AI Medical Assistant", page_icon="🧬", layout="wide")
+st.set_page_config(page_title="Venantie Medical Assistant", page_icon="🧬", layout="wide")
 st.title("🧬 AI Medical Assistant")
 st.markdown("This AI agent helps doctors interpret patients' lab results or reports.")
 
