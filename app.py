@@ -1,9 +1,8 @@
 import streamlit as st
 import pandas as pd
 import google.generativeai as genai
-import os
 
-# Load API key from Streamlit Secrets
+# Load Gemini API key from Streamlit Secrets
 gemini_api_key = st.secrets["GEMINI_API_KEY"]
 genai.configure(api_key=gemini_api_key)
 
@@ -19,8 +18,15 @@ uploaded_file = st.file_uploader("📁 Upload patient results (CSV or TXT)", typ
 if uploaded_file:
     if uploaded_file.type == "text/csv":
         df = pd.read_csv(uploaded_file)
-        st.subheader("📊 Patient Data")
-        st.dataframe(df.head())
+
+        # Limit rows to max 10 to reduce prompt size & API usage
+        max_rows = 10
+        if len(df) > max_rows:
+            st.warning(f"⚠️ Showing only first {max_rows} rows to reduce API usage.")
+            df = df.head(max_rows)
+
+        st.subheader("📊 Patient Data Preview")
+        st.dataframe(df)
         result_text = df.to_string()
     else:
         result_text = uploaded_file.read().decode()
@@ -40,6 +46,9 @@ Patient Data:
 Extra Context:
 {extra_context}
 """
-            response = model.generate_content(prompt)
-            st.markdown("### 🧠 AI Medical Insights")
-            st.write(response.text)
+            try:
+                response = model.generate_content(prompt)
+                st.markdown("### 🧠 AI Medical Insights")
+                st.write(response.text)
+            except Exception as e:
+                st.error(f"⚠️ API Error: {e}\nPlease try again later or reduce the data size.")
