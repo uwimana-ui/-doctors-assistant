@@ -1,13 +1,18 @@
 import streamlit as st
-import openai
 import pandas as pd
-from dotenv import load_dotenv
+import google.generativeai as genai
 import os
+from dotenv import load_dotenv
 
-# Load OpenAI key from .env
+# Load Gemini API key
 load_dotenv()
-openai.api_key = os.getenv("OPENAI_API_KEY")
+gemini_api_key = os.getenv("GEMINI_API_KEY") or st.secrets["GEMINI_API_KEY"]
 
+# Configure Gemini
+genai.configure(api_key=gemini_api_key)
+model = genai.GenerativeModel("gemini-pro")  # free model
+
+# Streamlit UI
 st.set_page_config(page_title="Venantie Medical Assistant", page_icon="🧬", layout="wide")
 st.title("🧬 AI Medical Assistant")
 st.markdown("This AI agent helps doctors interpret patients' lab results or reports.")
@@ -27,14 +32,16 @@ if uploaded_file is not None:
     extra_context = st.text_area("Any additional context (e.g., symptoms)?")
 
     if st.button("Interpret Results"):
-        with st.spinner("Analyzing with AI..."):
-            prompt = f"You are a medical expert. Interpret the following patient results and provide potential diagnoses, abnormalities, or recommendations:\n\n{result_text}\n\nAdditional context: {extra_context}"
-            response = openai.ChatCompletion.create(
-                model="gpt-4",
-                messages=[
-                    {"role": "system", "content": "You are a professional medical diagnostic assistant."},
-                    {"role": "user", "content": prompt}
-                ]
-            )
+        with st.spinner("Analyzing with Gemini AI..."):
+            prompt = f"""
+You are a professional medical assistant. Analyze the following patient test results and provide possible medical concerns, diagnoses, or treatment recommendations.
+
+Patient Data:
+{result_text}
+
+Extra context:
+{extra_context}
+"""
+            response = model.generate_content(prompt)
             st.markdown("### 🧠 AI Interpretation")
-            st.write(response['choices'][0]['message']['content'])
+            st.write(response.text)
